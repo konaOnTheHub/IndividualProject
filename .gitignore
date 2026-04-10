@@ -1,0 +1,5 @@
+/dataset
+/api/__pycache__
+/.venv
+/models/*
+.env
