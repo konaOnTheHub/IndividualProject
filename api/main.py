@@ -1,6 +1,11 @@
 import io
 import os
 from contextlib import asynccontextmanager
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).resolve().parent / ".env")
 
 import torch
 import torch.nn.functional as F
