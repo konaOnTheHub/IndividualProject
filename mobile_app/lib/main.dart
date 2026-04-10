@@ -4,7 +4,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mime/mime.dart';
 
 // --- API models (contract from FastAPI `HealthResponse` / `ClassifyResponse`) ---
 
@@ -97,9 +99,51 @@ Future<HealthStatus> fetchHealth(String baseUrl) async {
   );
 }
 
+/// Resolves a MIME type the API accepts (`image/jpeg`, `image/png`, `image/webp`, `image/jpg`).
+/// [MultipartFile.fromPath] defaults to `application/octet-stream` without this, which rejects
+/// on the server.
+Future<MediaType> _imageContentTypeForPath(String path) async {
+  String? mime = lookupMimeType(path);
+  if (mime == null) {
+    final file = File(path);
+    if (await file.exists()) {
+      final len = await file.length();
+      if (len > 0) {
+        final n = len < 64 ? len : 64;
+        final header = await file.openRead(0, n).fold<List<int>>(<int>[], (a, b) => a..addAll(b));
+        mime = lookupMimeType(path, headerBytes: header);
+      }
+    }
+  }
+  if (mime == 'image/jpg') return MediaType('image', 'jpeg');
+  const allowed = {'image/jpeg', 'image/jpg', 'image/png', 'image/webp'};
+  if (mime != null && allowed.contains(mime)) {
+    return MediaType.parse(mime);
+  }
+  final lower = path.toLowerCase();
+  if (lower.endsWith('.png')) return MediaType('image', 'png');
+  if (lower.endsWith('.webp')) return MediaType('image', 'webp');
+  if (lower.endsWith('.jpg') ||
+      lower.endsWith('.jpeg') ||
+      lower.endsWith('.jpe')) {
+    return MediaType('image', 'jpeg');
+  }
+  if (mime != null && mime.startsWith('image/')) {
+    return MediaType.parse(mime);
+  }
+  return MediaType('image', 'jpeg');
+}
+
 Future<ClassificationResult> classifyImage(String baseUrl, String imagePath) async {
+  final contentType = await _imageContentTypeForPath(imagePath);
   final request = http.MultipartRequest('POST', Uri.parse('$baseUrl/classify'))
-    ..files.add(await http.MultipartFile.fromPath('file', imagePath));
+    ..files.add(
+      await http.MultipartFile.fromPath(
+        'file',
+        imagePath,
+        contentType: contentType,
+      ),
+    );
   final streamed = await request.send();
   final response = await http.Response.fromStream(streamed);
 
@@ -243,7 +287,7 @@ class _WasteHomePageState extends State<WasteHomePage> {
     }
   }
 
-  Future<void> _takePhotoAndClassify() async {
+  Future<void> _pickImageAndClassify(ImageSource source) async {
     if (_selectedBorough == null) return;
 
     setState(() {
@@ -252,7 +296,7 @@ class _WasteHomePageState extends State<WasteHomePage> {
     });
 
     final picked = await _picker.pickImage(
-      source: ImageSource.camera,
+      source: source,
       maxWidth: 2048,
       maxHeight: 2048,
       imageQuality: 88,
@@ -412,7 +456,7 @@ class _WasteHomePageState extends State<WasteHomePage> {
           Text('Borough: $_selectedBorough', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 24),
           Text(
-            'Take a clear photo of the waste item. The image is sent to your classifier API.',
+            'Take a clear photo or choose an image file. The image is sent to your classifier API.',
             style: Theme.of(context).textTheme.bodyLarge,
           ),
           const SizedBox(height: 24),
@@ -431,9 +475,15 @@ class _WasteHomePageState extends State<WasteHomePage> {
             )
           else ...[
             FilledButton.icon(
-              onPressed: _takePhotoAndClassify,
+              onPressed: () => _pickImageAndClassify(ImageSource.camera),
               icon: const Icon(Icons.photo_camera),
               label: const Text('Take photo & classify'),
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: () => _pickImageAndClassify(ImageSource.gallery),
+              icon: const Icon(Icons.photo_library_outlined),
+              label: const Text('Choose image & classify'),
             ),
             if (_classifyError != null) ...[
               const SizedBox(height: 16),

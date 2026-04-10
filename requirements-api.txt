@@ -9,7 +9,7 @@
 #
 # OpenAPI UI: http://127.0.0.1:8000/docs
 #
-# Environment variables:
+# Environment variables (optional `api/.env`; loaded automatically by api/main.py):
 #   WASTE_MODEL_PATH   — checkpoint .pth (default: ./best_efficientnetv2s_384.pth)
 #   WASTE_MAX_UPLOAD_MB — max multipart image size in MiB (default: 10)
 #   CORS_ORIGINS       — comma-separated origins, or * for all (default: unset = no CORS)
@@ -17,6 +17,7 @@
 fastapi>=0.115.0
 uvicorn[standard]>=0.30.0
 python-multipart>=0.0.9
+python-dotenv>=1.0.0
 torch>=2.0.0
 torchvision>=0.15.0
 Pillow>=10.0.0
