@@ -1,0 +1,62 @@
+{
+  "Barnet": {
+    "battery": "Do not put batteries inside any household bin. Use supermarket battery takeback or Barnet’s Summers Lane Reuse and Recycling Centre; some properties can set batteries out for collection—see barnet.gov.uk recycling pages.",
+    "biological": "Many Barnet homes do not have a separate food waste collection—check barnet.gov.uk for your property. Food scraps and soiled packaging usually belong in the black refuse bin unless you have a food or garden service.",
+    "cardboard": "Clean, dry cardboard (flattened) goes in the blue mixed recycling bin; very large sheets can be placed beside the bin. Keep cardboard free of food and grease.",
+    "glass": "Rinse glass bottles and jars and place them in the blue mixed recycling bin (lids can be left on or off per Barnet guidance).",
+    "metal": "Rinse food tins, drink cans, empty aerosols, and foil trays and place them loose in the blue mixed recycling bin.",
+    "paper": "Clean mixed paper and envelopes go in the blue bin. Shredded paper must be sealed inside a paper envelope before recycling.",
+    "plastic": "Rinse plastic bottles, pots, tubs, and trays and put them in the blue bin; remove plastic film from trays and put film in refuse. No plastic bags or polystyrene in recycling.",
+    "clothes": "Textiles do not go in recycling bins—donate good items or use textile banks; large volumes can go to Summers Lane.",
+    "shoes": "Reusable shoes should be donated or taken to textile/shoe banks—not placed in the blue recycling bin.",
+    "trash": "Non-recyclables, contaminated items, nappies, and plastic film go in the black refuse bin. Check the North London Waste Authority A–Z for unusual items."
+  },
+  "Camden": {
+    "battery": "Never put batteries in rubbish or recycling bins (fire risk). Use supermarket drop-offs, order a Veolia battery bag, or take them to Regis Road Reuse and Recycling Centre—see camden.gov.uk.",
+    "biological": "Use your food waste caddies where provided: raw/cooked food, peelings, bones, dairy, and teabags go in the food waste service (compostable liner, paper, or no liner—not black bags)—see camden.gov.uk/what-goes-in-bins.",
+    "cardboard": "Clean cardboard and cartons go in your recycling bin or bags with other dry recyclables; flatten boxes and keep them dry.",
+    "glass": "Rinse glass bottles and jars and place them in your recycling collection.",
+    "metal": "Rinse tins, cans, aerosols, aluminium foil, and bottle tops and put them in your recycling bin or bags.",
+    "paper": "Newspapers, magazines, letters, and clean paper go in recycling; keep paper dry and not food-soiled.",
+    "plastic": "Empty and rinse plastic bottles, pots, tubs, and cartons; Camden also accepts empty plastic carrier bags in recycling—see what goes in my bin.",
+    "clothes": "Order textile recycling bags from Veolia or use charity banks—textiles must not go in mixed recycling.",
+    "shoes": "Donate wearable shoes or use textile collections; do not place them in recycling bins.",
+    "trash": "Cling film, polystyrene, nappies, crisp packets, and other non-recyclables go in your rubbish bin or bags."
+  },
+  "Greenwich": {
+    "battery": "Batteries must not go in any kerbside bin. Take them to the Reuse and Recycling Centre or suitable retail collection points.",
+    "biological": "Food and garden waste go in the green-top bin or approved paper/corn starch sacks—loose or lined with newspaper/compostable bags; no plastic bin liners.",
+    "cardboard": "Clean, dry cardboard goes loose in the blue-top recycling bin (rinse containers; do not bag recycling).",
+    "glass": "Rinse glass bottles and jars and place them loose in the blue-top recycling bin.",
+    "metal": "Rinse tins, cans, empty aerosols, and foil meal containers and place them loose in the blue-top bin.",
+    "paper": "Paper, magazines, envelopes, and non-glitter cards go in the blue-top recycling bin if clean and dry.",
+    "plastic": "Plastic bottles, pots, and trays (not black plastic) go in the blue-top bin; plastic film, pouches, and carrier bags belong in the black-top refuse bin.",
+    "clothes": "Textiles are not accepted in the blue bin—use textile banks, charities, or the reuse and recycling centre.",
+    "shoes": "Donate reusable shoes or use textile banks; not for the blue recycling bin.",
+    "trash": "Non-recyclables go in the black-top bin (bagged). Electricals, wood, and building waste need separate arrangements—see royalgreenwich.gov.uk."
+  },
+  "Hackney": {
+    "battery": "Do not put batteries in sacks or bins. Use retailer takeback or North London guidance—see hackney.gov.uk / NLWA A–Z.",
+    "biological": "Food waste goes in your caddy then outdoor/communal food bin: use compostable liners, newspaper, or no liner—never plastic bags; see hackney.gov.uk/food-waste.",
+    "cardboard": "Clean card and cartons go in green recycling bags or communal recycling if dry; greasy or food-stained card belongs in rubbish.",
+    "glass": "Rinse glass bottles and jars and place them in your recycling bag or communal recycling.",
+    "metal": "Rinse tins, cans, aerosols, and foil trays and put them in recycling (empty aerosols only).",
+    "paper": "Clean paper and card go in recycling; dirty paper (e.g. greasy) goes in rubbish.",
+    "plastic": "Rinse plastic bottles, pots, and trays for recycling; flexible plastics, films, and crisp packets go in rubbish.",
+    "clothes": "Use textile banks or reuse services—clothes are not collected in mixed recycling.",
+    "shoes": "Donate or use textile banks; do not put shoes in recycling sacks.",
+    "trash": "Nappies, wipes, films, polystyrene, and non-recyclables go in black rubbish bins or bags."
+  },
+  "Lambeth": {
+    "battery": "Undamaged household batteries (not car or phone/laptop lithium-ion packs) can be left in a loosely tied carrier bag on top of your green recycling bin—never inside the bin. See lambeth.gov.uk for details.",
+    "biological": "Use your food waste bin for meat, fish, dairy, veg, bread, rice, teabags, and plate scrapings—order free caddies if needed.",
+    "cardboard": "Clean paper and card go loose in the green recycling bin or clear council sacks; flatten boxes and keep them dry.",
+    "glass": "Rinse jars and bottles and place them in the green recycling bin; put metal lids in separately per Lambeth guidance.",
+    "metal": "Food and drink cans go in the green recycling bin. Foil and some metal packaging may need alternative recycling—check Lambeth’s A–Z.",
+    "paper": "Dry newspapers, magazines, and card go in green recycling; food-soiled paper or glitter cards belong in rubbish.",
+    "plastic": "Rinse plastic bottles (lids on), pots, tubs, trays, and drink cartons for the green bin—no plastic film, crisp packets, or black sacks as liners.",
+    "clothes": "Clothes and shoes are not accepted in the green bin—use textile banks or council textile services.",
+    "shoes": "Donate wearable shoes or use textile collections; not for kerbside recycling.",
+    "trash": "Non-recyclables, films, polystyrene, nappies, and contaminated items go in the black rubbish bin."
+  }
+}
