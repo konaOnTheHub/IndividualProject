@@ -1,3 +1,4 @@
+// Waste classifier: pick an image, POST it to the classifier API, show predictions + borough tips.
 import 'dart:convert';
 import 'dart:io';
 
@@ -8,7 +9,7 @@ import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
 
-// --- API models (contract from FastAPI `HealthResponse` / `ClassifyResponse`) ---
+// API response models
 
 class HealthStatus {
   const HealthStatus({
@@ -63,7 +64,8 @@ class ClassificationResult {
   }
 }
 
-// --- Confidence / top-K (same rules as prior `confidence_rules.dart`) ---
+// Confidence
+// Lower confidence means show more alternative labels in the UI.
 
 int topCountForConfidence(double confidence) {
   if (confidence >= 0.70) return 1;
@@ -80,7 +82,7 @@ List<MapEntry<String, double>> topCandidates(
   return entries.take(topCountForConfidence(confidence)).toList();
 }
 
-// --- API client ---
+// API client
 
 String resolveBaseUrl() {
   const configured = String.fromEnvironment('API_BASE_URL', defaultValue: '');
@@ -99,9 +101,7 @@ Future<HealthStatus> fetchHealth(String baseUrl) async {
   );
 }
 
-/// Resolves a MIME type the API accepts (`image/jpeg`, `image/png`, `image/webp`, `image/jpg`).
-/// [MultipartFile.fromPath] defaults to `application/octet-stream` without this, which rejects
-/// on the server.
+//Determine the image type
 Future<MediaType> _imageContentTypeForPath(String path) async {
   String? mime = lookupMimeType(path);
   if (mime == null) {
@@ -110,7 +110,9 @@ Future<MediaType> _imageContentTypeForPath(String path) async {
       final len = await file.length();
       if (len > 0) {
         final n = len < 64 ? len : 64;
-        final header = await file.openRead(0, n).fold<List<int>>(<int>[], (a, b) => a..addAll(b));
+        final header = await file
+            .openRead(0, n)
+            .fold<List<int>>(<int>[], (a, b) => a..addAll(b));
         mime = lookupMimeType(path, headerBytes: header);
       }
     }
@@ -134,8 +136,12 @@ Future<MediaType> _imageContentTypeForPath(String path) async {
   return MediaType('image', 'jpeg');
 }
 
-Future<ClassificationResult> classifyImage(String baseUrl, String imagePath) async {
+Future<ClassificationResult> classifyImage(
+  String baseUrl,
+  String imagePath,
+) async {
   final contentType = await _imageContentTypeForPath(imagePath);
+  // Multipart field name must match what the FastAPI endpoint expects
   final request = http.MultipartRequest('POST', Uri.parse('$baseUrl/classify'))
     ..files.add(
       await http.MultipartFile.fromPath(
@@ -153,6 +159,7 @@ Future<ClassificationResult> classifyImage(String baseUrl, String imagePath) asy
     );
   }
 
+  // Client errors
   if (response.statusCode == 400 ||
       response.statusCode == 413 ||
       response.statusCode == 415) {
@@ -170,15 +177,9 @@ String _parseApiDetail(String body) {
   }
 }
 
-// --- Borough guidance (loaded from asset JSON) ---
+//Borough guidance
 
-const kBoroughs = [
-  'Barnet',
-  'Camden',
-  'Greenwich',
-  'Hackney',
-  'Lambeth',
-];
+const kBoroughs = ['Barnet', 'Camden', 'Greenwich', 'Hackney', 'Lambeth'];
 
 Future<Map<String, Map<String, String>>> loadBoroughGuidance() async {
   final raw = await rootBundle.loadString('assets/borough_guidance.json');
@@ -201,7 +202,7 @@ String guidanceFor(
   return 'Check your council’s A–Z waste guide or reuse and recycling centre for how to dispose of this material safely.';
 }
 
-// --- App ---
+//App
 
 void main() {
   runApp(const WasteClassifierApp());
@@ -234,11 +235,13 @@ class _WasteHomePageState extends State<WasteHomePage> {
   final String _baseUrl = resolveBaseUrl();
   final ImagePicker _picker = ImagePicker();
 
+  // Startup API health
   bool _checkingHealth = true;
   String? _startupError;
   Map<String, Map<String, String>>? _guidance;
   String? _guidanceLoadError;
 
+  //Flow borough -> capture -> results.
   String? _selectedBorough;
   bool _classifying = false;
   String? _classifyError;
@@ -250,6 +253,7 @@ class _WasteHomePageState extends State<WasteHomePage> {
     _runStartupChecks();
   }
 
+  // Ping /health, then load borough JSON.
   Future<void> _runStartupChecks() async {
     setState(() {
       _checkingHealth = true;
@@ -295,12 +299,8 @@ class _WasteHomePageState extends State<WasteHomePage> {
       _result = null;
     });
 
-    final picked = await _picker.pickImage(
-      source: source,
-      maxWidth: 2048,
-      maxHeight: 2048,
-      imageQuality: 88,
-    );
+    //Retrieve the image from the user's device
+    final picked = await _picker.pickImage(source: source);
     if (picked == null || !mounted) return;
 
     setState(() => _classifying = true);
@@ -335,6 +335,7 @@ class _WasteHomePageState extends State<WasteHomePage> {
     });
   }
 
+  //Build the UI
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -347,6 +348,7 @@ class _WasteHomePageState extends State<WasteHomePage> {
   }
 
   Widget _buildBody(BuildContext context) {
+    // API health check → borough selection → image capture → results.
     if (_checkingHealth) {
       return const Center(
         child: Column(
@@ -367,7 +369,11 @@ class _WasteHomePageState extends State<WasteHomePage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.cloud_off, size: 56, color: Theme.of(context).colorScheme.error),
+              Icon(
+                Icons.cloud_off,
+                size: 56,
+                color: Theme.of(context).colorScheme.error,
+              ),
               const SizedBox(height: 16),
               Text(
                 _startupError!,
@@ -391,15 +397,15 @@ class _WasteHomePageState extends State<WasteHomePage> {
         ),
       );
     }
-
+    //If user has not selected a borough, show the borough step
     if (_selectedBorough == null) {
       return _buildBoroughStep(context);
     }
-
+    //If user has classified an image, show the result step
     if (_result != null) {
       return _buildResultStep(context);
     }
-
+    //If user has not uploaded an image, show the capture step
     return _buildCaptureStep(context);
   }
 
@@ -417,7 +423,9 @@ class _WasteHomePageState extends State<WasteHomePage> {
                 padding: const EdgeInsets.all(12),
                 child: Text(
                   _guidanceLoadError!,
-                  style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer),
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onErrorContainer,
+                  ),
                 ),
               ),
             ),
@@ -430,8 +438,8 @@ class _WasteHomePageState extends State<WasteHomePage> {
         Text(
           'We’ll show disposal tips for your area after classification.',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
         const SizedBox(height: 24),
         ...kBoroughs.map(
@@ -453,10 +461,13 @@ class _WasteHomePageState extends State<WasteHomePage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Borough: $_selectedBorough', style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            'Borough: $_selectedBorough',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           const SizedBox(height: 24),
           Text(
-            'Take a clear photo or choose an image file. The image is sent to your classifier API.',
+            'Take a clear photo or choose an image file.',
             style: Theme.of(context).textTheme.bodyLarge,
           ),
           const SizedBox(height: 24),
@@ -518,8 +529,8 @@ class _WasteHomePageState extends State<WasteHomePage> {
               ? 'The model is not fully sure — showing the top ${candidates.length} possibilities:'
               : 'Top prediction:',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
         const SizedBox(height: 16),
         ...candidates.asMap().entries.map((e) {
@@ -548,12 +559,14 @@ class _WasteHomePageState extends State<WasteHomePage> {
                       Expanded(
                         child: Text(
                           c.key,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.w600),
                         ),
                       ),
-                      Text('$pct%', style: Theme.of(context).textTheme.titleMedium),
+                      Text(
+                        '$pct%',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
                     ],
                   ),
                   const SizedBox(height: 12),
