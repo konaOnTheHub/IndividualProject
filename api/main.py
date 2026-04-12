@@ -11,7 +11,7 @@ import torch
 import torch.nn.functional as F
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from PIL import Image
+from PIL import Image, ImageOps
 from pydantic import BaseModel, Field
 
 from api.labels import CLASS_NAMES, NUM_CLASSES
@@ -108,7 +108,12 @@ async def classify(file: UploadFile = File(...)):
         )
 
     try:
-        img = Image.open(io.BytesIO(data)).convert("RGB")
+        img = Image.open(io.BytesIO(data))
+        # Match how users see the photo: camera JPEGs often rely on EXIF Orientation while
+        # some clients (e.g. mobile pickers) pre-rotate and strip EXIF. Transposing here
+        # makes raw uploads and app uploads classify the same scene consistently.
+        img = ImageOps.exif_transpose(img)
+        img = img.convert("RGB")
     except OSError as e:
         raise HTTPException(400, detail=f"Invalid image: {e}") from e
     #Convert image to tensor
